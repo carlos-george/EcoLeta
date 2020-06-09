@@ -28,6 +28,38 @@ class PointsController {
         return response.json(serializedPoints);
     }
 
+    async list(request: Request, response: Response) {
+
+        const { city, uf, items } = request.query;
+
+        const parsedItems = String(items)
+                .split(',')
+                .map(item => Number(item.trim()));
+
+        const points = await knex('points')
+        .join('points_items', 'points.id_point', '=', 'points_items.id_point')
+        .whereIn('points_items.id_item', parsedItems)
+        .where('points.city', String(city))
+        .where('points.uf', String(uf))
+        .distinct()
+        .select('points.*');
+
+        const serializedPoints = points.map(point => {
+            return {
+                ...point, 
+                image: `http://192.168.0.17:3333/uploads/${point.image}`
+                }
+        });      
+
+        Promise.all(serializedPoints.map(async point => {
+            return await knex('items')
+                        .join('points_items', 'items.id_item', '=', 'points_items.id_item')
+                        .where('points_items.id_point', point.id_point)
+                        .select('items.titulo').then(res => ({...point, items: res}))
+        })).then(res => response.json(res));
+
+    }
+
     async show(request: Request, response: Response) {
 
         const { id } = request.params;
@@ -48,7 +80,30 @@ class PointsController {
                 image: `http://192.168.0.17:3333/uploads/${point.image}`, 
                 items
             });
-    } 
+    }
+    
+    async delete(request: Request, response: Response) {
+        
+        const { id } = request.params;
+
+        const trx = await knex.transaction();
+
+        const point = await trx('points').where('id_point', id).first();
+
+        if(!point) {
+            return response.status(400).json({ message: 'Point not found.'})
+        }
+
+        await trx('points_items').where('id_point', id).del();
+
+        await trx('points').where('id_point', id).del();
+
+        await trx.commit();
+
+        return response.json({
+            message: 'Ponto de coleta excluído com sucesso'
+        });
+    }
 
     async create(request: Request, response: Response) {
         const {

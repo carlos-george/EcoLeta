@@ -113,21 +113,12 @@ const CreatePoint = () => {
             data.append('image', selectedFile);
         }
 
-        // const data = {
-        //     name,
-        //     email,
-        //     whatsapp,
-        //     uf,
-        //     city,
-        //     latitude,
-        //     longitude,
-        //     items
-        // };
-        
         await api.post('points', data);
 
-        alert('Ponte de Coleta Criado');
-        history.push('/');
+        history.push({
+            pathname: '/success', 
+            state: { action: 'Cadastro concluído!'}
+        });
     }
 
     useEffect(() => {
@@ -178,7 +169,7 @@ const CreatePoint = () => {
             </header>
 
             <form onSubmit={handleSubmit}>
-                <h1>Cadastro do <br/> ponto de Coleta</h1>
+                <h1>Cadastro do ponto de Coleta</h1>
 
                 <Dropzone onFileUploaded={setSelectedFile} />
 

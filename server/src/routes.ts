@@ -18,23 +18,16 @@ routes.get('/', (request, response) => {
     return response.json({message: 'Hello World'});
 });
 
-routes.get('/items', async (request, response) => {
+routes.get('/items', itemController.index);
 
-    return itemController.index(request, response);
-});
+routes.get('/points/:id', pointsController.show);
 
-routes.get('/points/:id', async (request, response) => {
+routes.get('/points', pointsController.index);
 
-    return pointsController.show(request, response);
-});
-
-routes.get('/points', async (request, response) => {
-
-    return pointsController.index(request, response);
-});
+routes.get('/list-points', pointsController.list);
 
 routes.post('/points', 
-            uploade.single('image'), 
+           multer().any(), 
             celebrate({
                 body: Joi.object().keys({
                     name: Joi.string().required(),
@@ -50,7 +43,12 @@ routes.post('/points',
             {
                 abortEarly: false
             }),
-            pointsController.create);
+            uploade.single('image'),
+            pointsController.create
+            );
+
+routes.delete('/points/:id', pointsController.delete);
+
 
 export default routes;
 
