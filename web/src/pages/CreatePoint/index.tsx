@@ -38,7 +38,7 @@ const CreatePoint = () => {
 
     const [ idPoint, setIdPoint ] = useState();
 
-    const [ action, setAction ] = useState('Cadastro do')
+    const [ action, setAction ] = useState('Cadastrar')
     const [ formData, setFormData ] = useState({
         name: '',
         email: '',
@@ -214,7 +214,7 @@ const CreatePoint = () => {
             setAction('Editar');
         }else {
             setIdPoint(null);
-            setAction('Cadastro do');
+            setAction('Cadastrar');
         }
 
     }, [params]);
@@ -254,7 +254,7 @@ const CreatePoint = () => {
             </header>
 
             <form onSubmit={handleSubmit}>
-                <h1>{action} ponto de Coleta</h1>
+                <h1>{action} Ponto de Coleta</h1>
 
                 {imageUrl ? 
                     <img className="place-image" data-tip data-for="registerTip" 
@@ -355,7 +355,7 @@ const CreatePoint = () => {
                     </ul>
                 </fieldset>
 
-                <button type="submit">Editar ponto de coleta</button>    
+                <button type="submit">{action} ponto de coleta</button>    
             </form>
         </div>
     );
