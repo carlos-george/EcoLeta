@@ -27,7 +27,8 @@ routes.get('/points', pointsController.index);
 routes.get('/list-points', pointsController.list);
 
 routes.post('/points', 
-           multer().any(), 
+        //    multer().any(), 
+        uploade.single('image'),
             celebrate({
                 body: Joi.object().keys({
                     name: Joi.string().required(),
@@ -43,9 +44,31 @@ routes.post('/points',
             {
                 abortEarly: false
             }),
-            uploade.single('image'),
+            // uploade.single('image'),
             pointsController.create
-            );
+);
+
+routes.put('/points/:id', 
+        //    multer().any(), 
+        uploade.single('image'),
+            celebrate({
+                body: Joi.object().keys({
+                    name: Joi.string().required(),
+                    email: Joi.string().required().email(),
+                    whatsapp: Joi.string().required(),
+                    latitude: Joi.number().required(),
+                    longitude: Joi.number().required(),
+                    city: Joi.string().required(),
+                    uf: Joi.string().required().max(2),
+                    items: Joi.string().required(),
+                })
+            },
+            {
+                abortEarly: false
+            }),
+            // uploade.single('image'),
+            pointsController.update
+);
 
 routes.delete('/points/:id', pointsController.delete);
 

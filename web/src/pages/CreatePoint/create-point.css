@@ -200,3 +200,16 @@
     background: #E1FAEC;
     border: 2px solid #34CB79;
   }
+
+  .place-image {
+    height: 300px;
+    background: #E1FAEC;
+    border-radius: 10px;
+  
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 48px;
+    outline: 0;
+    cursor: pointer; 
+  }

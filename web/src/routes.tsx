@@ -12,6 +12,7 @@ const Routes = () => {
         <BrowserRouter>
             <Route component={Home} path="/" exact/>
             <Route component={CreatePoint} path="/create-point"/>
+            <Route component={CreatePoint} path="/update-point/:idPoint"/>
             <Route component={Success} path="/success"/>
             <Route component={Search} path="/search" />
             <Route component={ListPoints} path="/list-points" />

@@ -1,8 +1,10 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { FiArrowLeftCircle } from 'react-icons/fi';
 import { Map, TileLayer, Marker } from 'react-leaflet';
 import { LeafletMouseEvent } from 'leaflet';
+import ReactTooltip from 'react-tooltip';
 import axios from 'axios';
 
 import Dropzone from '../../components/dropzone/index';
@@ -11,8 +13,8 @@ import logo from '../../assets/logo.svg';
 import api from '../../services/api';
 
 interface Item {
-    id: number;
-    name: string;
+    id_item: number;
+    titulo: string;
     image_url: string;
 }
 
@@ -24,10 +26,19 @@ interface IBGECityResponse {
     nome: string;
 }
 
+interface Params {
+    idPoint: string;
+}
+
 const CreatePoint = () => {
 
     const history = useHistory();
 
+    const params = useParams<Params>();
+
+    const [ idPoint, setIdPoint ] = useState();
+
+    const [ action, setAction ] = useState('Cadastro do')
     const [ formData, setFormData ] = useState({
         name: '',
         email: '',
@@ -42,6 +53,7 @@ const CreatePoint = () => {
     const [ initialPosition, setInitialposition ] = useState<[number, number]>([0,0]);
     const [ selectedItems, setSelectedItems ] = useState<number[]>([]);
     const [ selectedFile, setSelectedFile ] = useState<File>();
+    const [ imageUrl, setImageUrl ] = useState('');
     
     function handleMapClick(event: LeafletMouseEvent) {
         const latLng = event.latlng;
@@ -113,13 +125,55 @@ const CreatePoint = () => {
             data.append('image', selectedFile);
         }
 
-        await api.post('points', data);
 
-        history.push({
-            pathname: '/success', 
-            state: { action: 'Cadastro concluído!'}
-        });
+        if(!idPoint) {
+
+            await api.post('points', data).then((res) => {
+                
+                const msg = res.data.message;
+    
+                history.push({
+                    pathname: '/success', 
+                    state: { action: msg}
+                });
+            });
+        } else {
+
+            await api.put(`points/${idPoint}`, data).then((res) => {
+                
+                const msg = res.data.message;
+    
+                history.push({
+                    pathname: '/success', 
+                    state: { action: msg}
+                });
+            });    
+        }
+
     }
+
+    useEffect(() => {
+        if(idPoint) {
+
+            api.get(`points/${idPoint}`).then((res) => {
+                const point = res.data;
+                // console.log(point);
+                setFormData({
+                        name: point.name,
+                        email: point.email,
+                        whatsapp: point.whatsapp
+                    });
+                setImageUrl(point.image);    
+                setSelectedUf(point.uf);
+                setSelectedCity(point.city);
+                setSelectedposition([point.latitude, point.longitude]);
+                setInitialposition([point.latitude, point.longitude]);
+                const idItems = point.items.map( (item: Item) => item.id_item);
+                setSelectedItems(idItems); 
+            });
+        }
+
+    }, [idPoint]);
 
     useEffect(() => {
         api.get('items').then(response => {
@@ -154,6 +208,37 @@ const CreatePoint = () => {
         });
     }, []);
 
+    useEffect(() => {
+        if(params && params.idPoint) {
+            setIdPoint(params.idPoint);
+            setAction('Editar');
+        }else {
+            setIdPoint(null);
+            setAction('Cadastro do');
+        }
+
+    }, [params]);
+
+    useEffect(() => {
+
+        const image = imageUrl.split('uploads/')[1];
+
+        if(image) {
+
+            api.get(`/uploads/${image}`, { responseType: 'arraybuffer'})
+                 .then(res => {
+
+                    const blob1 = new Blob([res.data], {
+                        type: 'image/*',
+                      });
+
+                    const img = image.split('-')[1];
+                    const file = new File([blob1], img);
+                    setSelectedFile(file);
+                });
+        }
+    }, [imageUrl]);
+
     return (
         <div id="page-create-point">
             <header>
@@ -169,10 +254,19 @@ const CreatePoint = () => {
             </header>
 
             <form onSubmit={handleSubmit}>
-                <h1>Cadastro do ponto de Coleta</h1>
+                <h1>{action} ponto de Coleta</h1>
 
-                <Dropzone onFileUploaded={setSelectedFile} />
-
+                {imageUrl ? 
+                    <img className="place-image" data-tip data-for="registerTip" 
+                            src={imageUrl} 
+                            alt={formData.name} 
+                            onClick={() => setImageUrl('')}
+                    /> 
+                    : <Dropzone onFileUploaded={setSelectedFile}/> }
+                
+                <ReactTooltip id="registerTip" place="top" effect="solid">
+                    Clique para adicionar uma nova imagem
+                </ReactTooltip>
                 <fieldset>
                     <legend>
                         <h2>Dados</h2>
@@ -182,6 +276,7 @@ const CreatePoint = () => {
                         <input type="text" 
                                 name="name"
                                 id="name"
+                                value={formData.name}
                                 onChange={handleInputChange}
                         />
                     </div>
@@ -191,6 +286,7 @@ const CreatePoint = () => {
                             <input type="email" 
                                     name="email"
                                     id="email"
+                                    value={formData.email}
                                     onChange={handleInputChange}
                             />
                         </div>
@@ -199,6 +295,7 @@ const CreatePoint = () => {
                             <input type="text" 
                                     name="whatsapp"
                                     id="whatsapp"
+                                    value={formData.whatsapp}
                                     onChange={handleInputChange}
                             />
                         </div>
@@ -247,18 +344,18 @@ const CreatePoint = () => {
                     </legend>
                     <ul className="items-grid">
                         {items.map(item => (
-                            <li key={item.id} 
-                                onClick={() => handleSelectItem(item.id)}
-                                className={selectedItems.includes(item.id) ? 'selected' : '' }    
+                            <li key={item.id_item} 
+                                onClick={() => handleSelectItem(item.id_item)}
+                                className={selectedItems.includes(item.id_item) ? 'selected' : '' }    
                             >
-                                <img src={item.image_url} alt={item.name}/>
-                                <span>{item.name}</span>
+                                <img src={item.image_url} alt={item.titulo}/>
+                                <span>{item.titulo}</span>
                             </li>
                         ))}
                     </ul>
                 </fieldset>
 
-                <button type="submit">Cadastrar ponto de coleta</button>    
+                <button type="submit">Editar ponto de coleta</button>    
             </form>
         </div>
     );
