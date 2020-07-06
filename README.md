@@ -62,19 +62,19 @@ This product aims to connect people to companies that collect waste used to impr
 
 <h1  align="center">
 
-<img  alt="layout8"  title="Screenshots"  src="assets/layout9.png"  width="500px" />
+<img  alt="layout9"  title="Screenshots"  src="assets/layout9.png"  width="500px" />
 
 </h1>
 
 <h1  align="center">
 
-<img  alt="layout8"  title="Screenshots"  src="assets/layout10.png"  width="500px" />
+<img  alt="layout10"  title="Screenshots"  src="assets/layout10.png"  width="500px" />
 
 </h1>
 
 <h1  align="center">
 
-<img  alt="layout8"  titlae="Screenshots"  src="assets/layout11.png"  width="500px" />
+<img  alt="layout11"  titlae="Screenshots"  src="assets/layout11.png"  width="500px" />
 
 </h1>
   
