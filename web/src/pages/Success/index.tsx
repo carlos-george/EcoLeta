@@ -13,9 +13,9 @@ const Success = () => {
     const history = useHistory();
     const location = useLocation();
 
-    const state = location.state as Params;
+    const { action } = location.state as Params;
 
-    const title = state ? state.action : 'Cadastro concluído!';
+    const title = action ? action : 'Cadastro concluído!';
 
     setTimeout(() => {
         history.push('/')
